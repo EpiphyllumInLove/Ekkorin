@@ -1,0 +1,187 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { works } from '../data/works';
+
+// 按 ID 降序排列（最新的在前）
+const sortedWorks = [...works].sort((a, b) => Number(b.id) - Number(a.id));
+---
+
+<Layout title="Ekkorin Gallery - 插画作品集" description="Ekkorin 的插画作品展示">
+  <header class="gallery-header">
+    <div class="header-content">
+      <h1 class="site-title">Ekkorin Gallery</h1>
+      <p class="site-desc">插画作品集</p>
+      <p class="work-count">{works.length} 件作品</p>
+    </div>
+  </header>
+
+  <main class="gallery-grid">
+    {sortedWorks.map((work, index) => (
+      <a href={`/work/${work.id}`} class="work-card fade-in" style={`animation-delay: ${index * 0.05}s`}>
+        <div class="card-image-wrapper">
+          <img
+            src={work.image}
+            alt={work.alt || work.title}
+            class="card-image"
+            loading="lazy"
+          />
+          {work.bilibili && (
+            <span class="badge-bili" title="关联B站动态">B站</span>
+          )}
+          {work.hasMd && (
+            <span class="badge-md" title="有笔记">笔记</span>
+          )}
+        </div>
+        <div class="card-info">
+          <h2 class="card-title">{work.title}</h2>
+        </div>
+      </a>
+    ))}
+  </main>
+
+  <footer class="gallery-footer">
+    <p>© Ekkorin Gallery</p>
+  </footer>
+</Layout>
+
+<style is:global>
+  .gallery-header {
+    padding: 60px 24px 40px;
+    text-align: center;
+  }
+
+  .header-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .site-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #e85d75, #ff9a76);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .site-desc {
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    margin-top: 8px;
+  }
+
+  .work-count {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 12px;
+  }
+
+  .gallery-grid {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .work-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .work-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+    border-color: var(--accent);
+  }
+
+  .card-image-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: #111;
+  }
+
+  .card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .work-card:hover .card-image {
+    transform: scale(1.05);
+  }
+
+  .badge-bili,
+  .badge-md {
+    position: absolute;
+    top: 10px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-bili {
+    right: 10px;
+    background: #00a1d6;
+    color: #fff;
+  }
+
+  .badge-md {
+    right: 56px;
+    background: #5d8ee8;
+    color: #fff;
+  }
+
+  .card-info {
+    padding: 14px 16px;
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  .gallery-footer {
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 640px) {
+    .gallery-grid {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      padding: 0 12px 40px;
+    }
+
+    .gallery-header {
+      padding: 40px 16px 24px;
+    }
+
+    .site-title {
+      font-size: 1.8rem;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+    }
+  }
+</style>
