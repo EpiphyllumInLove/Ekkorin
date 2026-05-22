@@ -1,0 +1,28 @@
+// 作品数据
+// 图片放在 public/images/ 目录下
+// MD 文件放在 public/md/ 目录下（文件名对应 id）
+
+export interface Work {
+  id: string;
+  title: string;
+  image: string;       // 图片路径，如 '/images/001.jpg'
+  alt?: string;
+  width?: number;       // 原图宽度，不填则在构建时自动获取
+  height?: number;      // 原图高度
+  bilibili?: string;    // B站动态ID，如 '732456789012345678'
+  hasMd?: boolean;      // 是否有本地 MD 文件
+}
+
+// ★★★ 在这里添加/修改作品数据 ★★★
+// 图片放在 public/images/ 目录下，命名如 001.jpg、002.png
+// B站动态：填写动态ID（URL里的数字部分），不填则不关联
+// MD文件：放在 public/md/ 目录下，命名如 001.md、002.md
+
+export const works: Work[] = [
+  {
+    id: '001',
+    title: '示例喵',
+    image: '/images/示例喵.png',
+    bilibili: '1145141919810',
+  }
+];

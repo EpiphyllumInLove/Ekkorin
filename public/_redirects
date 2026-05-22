@@ -1,0 +1,2 @@
+# Cloudflare Pages 路由重定向
+/api/*  /functions/api/:splat  200

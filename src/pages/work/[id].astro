@@ -1,0 +1,439 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { works } from '../../data/works';
+
+export async function getStaticPaths() {
+  return works.map((work) => ({
+    params: { id: work.id },
+    props: { work },
+  }));
+}
+
+const { work } = Astro.props;
+
+let imageWidth = work.width || 0;
+let imageHeight = work.height || 0;
+
+// 尝试获取图片尺寸
+if (!work.width || !work.height) {
+  try {
+    const sharp = (await import('sharp')).default;
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const imagePath = path.join(process.cwd(), 'public', work.image);
+    const metadata = await sharp(await fs.readFile(imagePath)).metadata();
+    imageWidth = metadata.width || 0;
+    imageHeight = metadata.height || 0;
+  } catch {
+    // 保持默认
+  }
+}
+
+// 获取 MD 内容
+let mdContent = '';
+let mdHtml = '';
+if (work.hasMd) {
+  try {
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const mdPath = path.join(process.cwd(), 'public/md', `${work.id}.md`);
+    mdContent = await fs.readFile(mdPath, 'utf-8');
+    // 转义 HTML 特殊字符
+    mdHtml = mdContent
+      .replace(/&/g, '&')
+      .replace(/</g, '<')
+      .replace(/>/g, '>')
+      .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br/>');
+    mdHtml = `<p>${mdHtml}</p>`;
+  } catch {
+    mdHtml = '<p>笔记文件加载失败</p>';
+  }
+}
+
+// 确定图片显示尺寸，限制最大宽度
+const displayWidth = Math.min(imageWidth || 1200, 1400);
+const displayHeight = imageWidth && imageHeight
+  ? Math.round((displayWidth / imageWidth) * imageHeight)
+  : undefined;
+---
+
+<Layout title={`${work.title} - Ekkorin Gallery`} description={work.title} image={work.image}>
+  <nav class="back-nav">
+    <a href="/" class="back-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      返回画廊
+    </a>
+  </nav>
+
+  <main class="detail-page">
+    <div class="detail-image-section">
+      <div class="image-container" style={
+        displayWidth && displayHeight
+          ? { maxWidth: `${displayWidth}px`, aspectRatio: `${displayWidth}/${displayHeight}` }
+          : { maxWidth: '1200px' }
+      }>
+        <img
+          src={work.image}
+          alt={work.alt || work.title}
+          class="detail-image"
+          style={displayWidth ? { maxWidth: '100%', maxHeight: '90vh' } : {}}
+        />
+      </div>
+      <p class="image-dimensions">{imageWidth} × {imageHeight}</p>
+    </div>
+
+    <div class="detail-content-section">
+      <div class="detail-header">
+        <h1 class="detail-title">{work.title}</h1>
+      </div>
+
+      <!-- B站动态区域 -->
+      {work.bilibili && (
+        <div class="bilibili-section" id="bili-section">
+          <div class="bili-header">
+            <svg class="bili-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.662.373-.92.249-.258.555-.387.92-.387.364 0 .67.129.92.387L9.653 4.76c.142.142.213.32.213.533 0 .214-.071.392-.213.534-.143.142-.32.213-.534.213H5.333c-.924 0-1.71.338-2.36 1.013-.649.676-.979 1.458-.986 2.347v7.36c.007.889.337 1.67.986 2.347.65.675 1.436 1.013 2.36 1.013h13.334c.924 0 1.71-.338 2.36-1.013.65-.676.979-1.458.986-2.347v-7.36c-.007-.889-.337-1.67-.986-2.347-.65-.675-1.436-1.013-2.36-1.013H9.333c-.213 0-.391-.071-.533-.213-.143-.142-.214-.32-.214-.534 0-.213.071-.391.214-.533L12.107.907c.249-.258.555-.387.92-.387.364 0 .67.129.92.387.249.258.373.564.373.92 0 .355-.124.662-.373.906l-1.174 1.12h4.04zM8.107 10.64c.249-.258.555-.387.92-.387.364 0 .67.129.92.387.249.258.373.564.373.92v2.133c0 .355-.124.662-.373.92-.25.258-.556.387-.92.387-.365 0-.671-.129-.92-.387-.249-.258-.373-.565-.373-.92V11.56c0-.356.124-.662.373-.92zm5.866 0c.25-.258.556-.387.92-.387s.671.129.92.387c.249.258.373.564.373.92v2.133c0 .355-.124.662-.373.92-.249.258-.556.387-.92.387s-.671-.129-.92-.387c-.249-.258-.373-.565-.373-.92V11.56c0-.356.124-.662.373-.92z"/>
+            </svg>
+            <span>B站动态</span>
+          </div>
+          <div id="bili-content" class="bili-loading">
+            <div class="loading-spinner"></div>
+            <span>加载中...</span>
+          </div>
+          <a id="bili-link" href={`https://t.bilibili.com/${work.bilibili}`} target="_blank" rel="noopener" class="bili-link">
+            在B站打开 ↗
+          </a>
+        </div>
+      )}
+
+      <!-- MD 笔记区域 -->
+      {mdHtml && (
+        <div class="md-section">
+          <div class="md-header">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            <span>笔记</span>
+          </div>
+          <div class="md-content" set:html={mdHtml} />
+        </div>
+      )}
+    </div>
+  </main>
+
+  <script>
+    // 客户端B站动态加载
+    const biliId = '{work.bilibili}';
+    if (biliId) {
+      (async () => {
+        const container = document.getElementById('bili-content');
+        const link = document.getElementById('bili-link');
+        try {
+          const origin = window.location.origin;
+          const res = await fetch(`/api/bilibili/${biliId}`);
+          if (!res.ok) throw new Error('请求失败');
+          const data = await res.json();
+          if (data.ok && data.data) {
+            container.innerHTML = `
+              <div class="bili-title">${escapeHtml(data.data.title)}</div>
+              <div class="bili-text">${escapeHtml(data.data.content)}</div>
+              ${data.data.time ? `<div class="bili-time">${escapeHtml(data.data.time)}</div>` : ''}
+              ${data.data.images?.length ? `<div class="bili-images">${data.data.images.map(img => 
+                `<img src="${escapeHtml(img)}" loading="lazy" class="bili-img" />`
+              ).join('')}</div>` : ''}
+            `;
+          } else {
+            container.innerHTML = `<div class="bili-error">动态加载失败: ${escapeHtml(data.error || '未知错误')}</div>`;
+          }
+        } catch (e) {
+          container.innerHTML = `<div class="bili-error">网络请求失败，请手动查看</div>`;
+        }
+      })();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+  </script>
+</Layout>
+
+<style is:global>
+  .back-nav {
+    padding: 20px 24px 0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    transition: color var(--transition);
+    padding: 8px 16px;
+    border-radius: 50px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+
+  .back-link:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+
+  .detail-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    min-height: calc(100vh - 80px);
+  }
+
+  .detail-image-section {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+
+  .image-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .detail-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .image-dimensions {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .detail-content-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .detail-header {
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .detail-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  /* B站动态卡片 */
+  .bilibili-section {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-left: 3px solid #00a1d6;
+  }
+
+  .bili-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #00a1d6;
+  }
+
+  .bili-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .bili-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-dim);
+    padding: 16px 0;
+  }
+
+  .loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .bili-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .bili-text {
+    color: var(--text-dim);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    font-size: 0.92rem;
+  }
+
+  .bili-time {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 12px;
+  }
+
+  .bili-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .bili-img {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .bili-img:hover {
+    transform: scale(1.03);
+  }
+
+  .bili-link {
+    display: inline-block;
+    margin-top: 16px;
+    color: #00a1d6;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .bili-link:hover {
+    color: #33b4de;
+  }
+
+  .bili-error {
+    color: #e85d75;
+    padding: 8px 0;
+  }
+
+  /* MD 笔记卡片 */
+  .md-section {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-left: 3px solid #5d8ee8;
+  }
+
+  .md-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #5d8ee8;
+  }
+
+  .md-content {
+    color: var(--text-dim);
+    line-height: 1.8;
+    font-size: 0.92rem;
+  }
+
+  .md-content h1, .md-content h2, .md-content h3 {
+    color: var(--text);
+    margin: 16px 0 8px;
+  }
+
+  .md-content h1 { font-size: 1.3rem; }
+  .md-content h2 { font-size: 1.15rem; }
+  .md-content h3 { font-size: 1.05rem; }
+
+  .md-content strong {
+    color: var(--text);
+  }
+
+  .md-content a {
+    color: #5d8ee8;
+    text-decoration: underline;
+  }
+
+  .md-content pre {
+    background: #111;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    margin: 8px 0;
+    font-size: 0.85rem;
+  }
+
+  .md-content code {
+    background: #1a1a1a;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85em;
+  }
+
+  .md-content p {
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .detail-page {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      padding: 16px;
+    }
+
+    .detail-image-section {
+      position: static;
+    }
+
+    .detail-title {
+      font-size: 1.4rem;
+    }
+  }
+</style>
