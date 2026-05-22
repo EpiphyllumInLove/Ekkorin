@@ -4,6 +4,12 @@ import { works } from '../data/works';
 
 // 按 ID 降序排列（最新的在前）
 const sortedWorks = [...works].sort((a, b) => Number(b.id) - Number(a.id));
+
+// 缩略图路径：将原图路径 images/xxx.png 转为 thumbs/xxx.webp
+function getThumbSrc(imagePath: string): string {
+  const name = imagePath.replace('/images/', '').replace(/\.(png|jpg|jpeg)$/i, '.webp');
+  return `/thumbs/${name}`;
+}
 ---
 
 <Layout title="Ekkorin Gallery - 插画作品集" description="Ekkorin 的插画作品展示">
@@ -20,17 +26,13 @@ const sortedWorks = [...works].sort((a, b) => Number(b.id) - Number(a.id));
       <a href={`/work/${work.id}`} class="work-card fade-in" style={`animation-delay: ${index * 0.05}s`}>
         <div class="card-image-wrapper">
           <img
-            src={work.image}
+            src={getThumbSrc(work.image)}
             alt={work.alt || work.title}
             class="card-image"
             loading="lazy"
+            onerror="this.src=this.dataset.fallback"
+            data-fallback={work.image}
           />
-          {work.bilibili && (
-            <span class="badge-bili" title="关联B站动态">B站</span>
-          )}
-          {work.hasMd && (
-            <span class="badge-md" title="有笔记">笔记</span>
-          )}
         </div>
         <div class="card-info">
           <h2 class="card-title">{work.title}</h2>
@@ -119,29 +121,6 @@ const sortedWorks = [...works].sort((a, b) => Number(b.id) - Number(a.id));
 
   .work-card:hover .card-image {
     transform: scale(1.05);
-  }
-
-  .badge-bili,
-  .badge-md {
-    position: absolute;
-    top: 10px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-
-  .badge-bili {
-    right: 10px;
-    background: #00a1d6;
-    color: #fff;
-  }
-
-  .badge-md {
-    right: 56px;
-    background: #5d8ee8;
-    color: #fff;
   }
 
   .card-info {

@@ -4,8 +4,9 @@
   "description": "Ekkorin 画师作品展示网站",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
+    "build": "node scripts/thumbnails.mjs && astro build",
+    "preview": "astro preview",
+    "thumbs": "node scripts/thumbnails.mjs"
   },
   "dependencies": {
     "astro": "^4.0.0",
