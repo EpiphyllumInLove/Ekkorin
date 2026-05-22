@@ -1,0 +1,194 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { works } from '../../data/works';
+
+const work = works.find((w) => w.id === '26')!;
+
+const images = ['/images/d26由纪.png', '/images/d26由纪2.png'];
+
+// 获取 MD 内容
+let mdHtml = '';
+if (work.hasMd) {
+  try {
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const mdPath = path.join(process.cwd(), 'public/md', '26.md');
+    const mdContent = await fs.readFile(mdPath, 'utf-8');
+    mdHtml = mdContent
+      .replace(/&/g, '&')
+      .replace(/</g, '<')
+      .replace(/>/g, '>')
+      .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br/>');
+    mdHtml = `<p>${mdHtml}</p>`;
+  } catch {
+    mdHtml = '<p>笔记加载失败</p>';
+  }
+}
+---
+
+<Layout title={`${work.title} - Ekkorin Gallery`} description={work.title}>
+  <nav class="back-nav">
+    <a href="/" class="back-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      返回画廊
+    </a>
+  </nav>
+
+  <main class="page-26">
+    <h1 class="page-title">{work.title}</h1>
+
+    <div class="image-grid">
+      {images.map((src) => (
+        <div class="image-card">
+          <img src={src} alt={work.title} class="work-image" />
+        </div>
+      ))}
+    </div>
+
+    {mdHtml && (
+      <div class="md-section">
+        <div class="md-content" set:html={mdHtml} />
+      </div>
+    )}
+  </main>
+</Layout>
+
+<style is:global>
+  .back-nav {
+    padding: 20px 24px 0;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    transition: color var(--transition);
+    padding: 8px 16px;
+    border-radius: 50px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+
+  .back-link:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+
+  .page-26 {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .page-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .image-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .image-card {
+    width: 100%;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .work-image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .md-section {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 28px;
+    border: 1px solid var(--border);
+    border-left: 3px solid #5d8ee8;
+  }
+
+  .md-content {
+    color: var(--text-dim);
+    line-height: 1.8;
+    font-size: 0.95rem;
+  }
+
+  .md-content h1,
+  .md-content h2,
+  .md-content h3 {
+    color: var(--text);
+    margin: 20px 0 10px;
+  }
+
+  .md-content h1 { font-size: 1.4rem; }
+  .md-content h2 { font-size: 1.2rem; }
+  .md-content h3 { font-size: 1.05rem; }
+
+  .md-content strong {
+    color: var(--text);
+  }
+
+  .md-content a {
+    color: #5d8ee8;
+    text-decoration: underline;
+  }
+
+  .md-content pre {
+    background: #111;
+    padding: 14px 18px;
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    margin: 12px 0;
+    font-size: 0.85rem;
+  }
+
+  .md-content code {
+    background: #1a1a1a;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85em;
+  }
+
+  .md-content p {
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .page-26 {
+      padding: 16px;
+      gap: 20px;
+    }
+
+    .page-title {
+      font-size: 1.3rem;
+    }
+
+    .md-section {
+      padding: 20px;
+    }
+  }
+</style>

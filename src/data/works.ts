@@ -119,7 +119,7 @@ export const works: Work[] = [
     id: '26',
     title: 'Day26 欢迎来到学园生活部～',
     image: '/images/d26由纪.png',
-    hasMd: 'true',
+    bilibili: '1201676298340007942',
   },
   {
     id: '29',
