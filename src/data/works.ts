@@ -6,6 +6,7 @@ export interface Work {
   id: string;
   title: string;
   image: string;       // 图片路径，如 '/images/001.jpg'
+  images?: string[];   // 多张图片（可选），如果设置了这个会覆盖 image
   alt?: string;
   width?: number;       // 原图宽度，不填则在构建时自动获取
   height?: number;      // 原图高度
@@ -36,12 +37,6 @@ export const works: Work[] = [
     title: 'Day5 是魔法师伊吹哦!',
     image: '/images/d5伊吹.png',
     bilibili: '1193982156516360212',
-  },
-  {
-    id: '6',
-    title: 'Day6 上课..?还是摸个鱼吧',
-    image: '/images/d6羽安.png',
-    bilibili: '1194260326504202240',
   },
   {
     id: '7',
@@ -119,6 +114,7 @@ export const works: Work[] = [
     id: '26',
     title: 'Day26 欢迎来到学园生活部～',
     image: '/images/d26由纪.png',
+    images: ['/images/d26由纪.png', '/images/d26由纪2.png'],
     bilibili: '1201676298340007942',
   },
   {
@@ -144,5 +140,12 @@ export const works: Work[] = [
     title: 'Day34 天江衣！',
     image: '/images/d34_衣.png',
     bilibili: '1204714811596734472',
+  },
+  {
+    id: '36',
+    title: 'Day36 夕立！',
+    image: '/images/d36_夕立.png',
+	images: ['/images/d36_夕立.png', '/images/d36_夕立2.png'],
+    bilibili: '1205461903981150227',
   }
 ];

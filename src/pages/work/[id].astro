@@ -11,10 +11,8 @@ export async function getStaticPaths() {
 
 const { work } = Astro.props;
 
-// 由纪多图处理
-const images: string[] = work.id === '26'
-  ? ['/images/d26由纪.png', '/images/d26由纪2.png']
-  : [work.image];
+// 多图支持：如果有 images 字段则使用，否则用单张 image
+const images: string[] = work.images && work.images.length > 0 ? work.images : [work.image];
 ---
 
 <Layout title={`${work.title} - Ekkorin Gallery`} description={work.title}>
