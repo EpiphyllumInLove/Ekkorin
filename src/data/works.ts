@@ -147,5 +147,48 @@ export const works: Work[] = [
     image: '/images/d36_夕立.png',
 	images: ['/images/d36_夕立.png', '/images/d36_夕立2.png'],
     bilibili: '1205461903981150227',
+  },
+  {
+    id: '38',
+    title: 'Day38 小恶魔 菲米莉丝!',
+    image: '/images/d38_菲米莉丝.png',
+    bilibili: '1206207248348479511',
+  },
+  {
+    id: '40',
+    title: 'Day40 龙武 腾龙的春宴',
+    image: '/images/d40_龙武.png',
+    bilibili: '1206892821756248066',
+  },
+  {
+    id: '42',
+    title: 'Day42 安魂曲在吃番茄酱',
+    image: '/images/d42 安魂曲.png',
+	images: ['/images/d42 安魂曲.png', '/images/d42安魂曲.png'],
+    bilibili: '1207634919077969920',
+  },
+  {
+    id: '44',
+    title: 'Day44 天使真央！',
+    image: '/images/d44天使真央.png',
+    bilibili: '1208377085129654273',
+  },
+  {
+    id: '46',
+    title: 'Day46 香风智乃！',
+    image: '/images/d46智乃.png',
+    bilibili: '1209119324168519687',
+  },
+  {
+    id: '48',
+    title: 'Day48 在打游戏的小桃～',
+    image: '/images/d48_momoi.png',
+    bilibili: '1209861576164638724',
+  },
+  {
+    id: '50',
+    title: 'Day50 新子憧！',
+    image: '/images/d50_ako.png',
+    bilibili: '1210603617623474185',
   }
 ];
